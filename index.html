@@ -61,6 +61,14 @@
     canvas { display: none; }
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: white; padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
     .toast.show { opacity: 1; }
+  /* ↓ ここに追加 ↓ */
+  .footer { margin-top: 24px; padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); }
+  .footer .heart { color: #e53935; }
+  .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+  .footer a:hover { color: var(--accent-color); }
+  .footer .sep { margin: 0 8px; opacity: 0.5; }
+</style>
+    
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP&family=Noto+Serif+JP&display=swap" rel="stylesheet">
 </head>
@@ -121,6 +129,11 @@
         <span class="export-group-label">📝 テキスト</span>
         <button class="tool-btn" onclick="copyVerticalText()">📋 縦書きコピー</button>
       </div>
+
+      <footer class="footer">
+       Made with <span class="heart">♥</span> by Tsubuan © 2026<span class="sep">｜</span><a href="[https://x.com/tsubuan_sun](https://x.com/tsubuan_sun)" target="_blank">𝕏 でフォロー</a><span class="sep">｜</span><a href="[https://note.com/tsubuan_sun/n/nae115b6b663e](https://note.com/tsubuan_sun/n/nae115b6b663e)" target="_blank">🎁 投げ銭する</a><span class="sep">｜</span><a href="[http://buymeacoffee.com/tsubuan](http://buymeacoffee.com/tsubuan)" target="_blank">☕ Buy Me a Coffee</a>
+      </footer>
+      
       <div class="export-group">
         <span class="export-group-label">🖼️ 画像</span>
         <button class="tool-btn" onclick="copyImage()">📋 コピー</button>
