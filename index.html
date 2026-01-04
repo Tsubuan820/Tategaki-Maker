@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Tategaki-Maker</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>縦書きメーカー</title>
+  <style>
+    :root {
+      --bg-primary: #ffffff; --bg-secondary: #f5f5f5; --bg-toolbar: #ffffff;
+      --text-primary: #333333; --text-secondary: #666666; --border-color: #e0e0e0;
+      --accent-color: #5e89e6; --shadow: 0 2px 8px rgba(0,0,0,0.1); --preview-bg: #fffef8;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #1e1e1e; --bg-secondary: #2d2d2d; --bg-toolbar: #252525;
+      --text-primary: #e0e0e0; --text-secondary: #a0a0a0; --border-color: #404040;
+      --accent-color: #7aa2f7; --shadow: 0 2px 8px rgba(0,0,0,0.3); --preview-bg: #2a2a2a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    h1 { font-size: 1.5rem; font-weight: 600; background: linear-gradient(135deg, #5e89e6, #c0a2fa, #edaefc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .theme-toggle { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 16px; cursor: pointer; font-size: 1rem; transition: all 0.2s; color: var(--text-primary); }
+    .theme-toggle:hover { background: var(--accent-color); color: white; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: var(--bg-toolbar); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 16px; align-items: center; }
+    .tool-group { display: flex; gap: 4px; padding-right: 12px; border-right: 1px solid var(--border-color); align-items: center; }
+    .tool-group:last-child { border-right: none; padding-right: 0; }
+    .tool-group-label { font-size: 0.7rem; color: var(--text-secondary); margin-right: 4px; white-space: nowrap; }
+    .tool-btn { background: var(--bg-secondary); border: 2px solid transparent; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+    .tool-btn:hover { background: var(--accent-color); color: white; }
+    .tool-btn.active { border-color: var(--accent-color); background: var(--accent-color); color: white; }
+    .tool-btn.small { padding: 6px 10px; min-width: 36px; justify-content: center; }
+    .color-picker { width: 36px; height: 36px; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; padding: 2px; }
+    .main-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .main-area { grid-template-columns: 1fr; } }
+    .panel { background: var(--bg-toolbar); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; display: flex; flex-direction: column; }
+    .panel-title { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    textarea { flex: 1; min-height: 300px; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; line-height: 1.8; resize: none; font-family: inherit; }
+    textarea:focus { outline: none; border-color: var(--accent-color); }
+    textarea::placeholder { color: var(--text-secondary); }
+    .preview-container { flex: 1; min-height: 300px; background: var(--preview-bg); border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; overflow: auto; position: relative; }
+    .preview-content { writing-mode: vertical-rl; text-orientation: mixed; font-size: 1.2rem; line-height: 2; padding: 24px; white-space: pre-wrap; word-break: break-all; max-height: 100%; }
+    .preview-content.font-mincho { font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif; }
+    .preview-content.font-gothic { font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+    .preview-content.font-maru { font-family: "Kosugi Maru", "Rounded Mplus 1c", sans-serif; }
+    .placeholder-text { color: var(--text-secondary); font-size: 0.9rem; writing-mode: horizontal-tb; }
+    .bottom-bar { margin-top: 16px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .export-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .export-group-label { font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; margin-right: 4px; }
+    canvas { display: none; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: white; padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
+    .toast.show { opacity: 1; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP&family=Noto+Serif+JP&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📜 縦書きメーカー</h1>
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </header>
+
+    <div class="toolbar">
+      <div class="tool-group">
+        <span class="tool-group-label">フォント</span>
+        <button class="tool-btn small active" data-font="mincho" onclick="setFont('mincho')">明朝</button>
+        <button class="tool-btn small" data-font="gothic" onclick="setFont('gothic')">ゴシック</button>
+        <button class="tool-btn small" data-font="maru" onclick="setFont('maru')">丸ゴ</button>
+      </div>
+      <div class="tool-group">
+        <span class="tool-group-label">サイズ</span>
+        <button class="tool-btn small" data-size="S" onclick="setSize('S')">S</button>
+        <button class="tool-btn small active" data-size="M" onclick="setSize('M')">M</button>
+        <button class="tool-btn small" data-size="L" onclick="setSize('L')">L</button>
+        <button class="tool-btn small" data-size="XL" onclick="setSize('XL')">XL</button>
+      </div>
+      <div class="tool-group">
+        <span class="tool-group-label">行間</span>
+        <button class="tool-btn small" data-spacing="narrow" onclick="setSpacing('narrow')">狭</button>
+        <button class="tool-btn small active" data-spacing="normal" onclick="setSpacing('normal')">中</button>
+        <button class="tool-btn small" data-spacing="wide" onclick="setSpacing('wide')">広</button>
+      </div>
+      <div class="tool-group">
+        <span class="tool-group-label">文字色</span>
+        <input type="color" class="color-picker" id="textColor" value="#333333" onchange="updatePreview()">
+      </div>
+      <div class="tool-group">
+        <span class="tool-group-label">背景色</span>
+        <input type="color" class="color-picker" id="bgColor" value="#fffef8" onchange="updatePreview()">
+      </div>
+    </div>
+
+    <div class="main-area">
+      <div class="panel">
+        <div class="panel-title">✏️ 入力（横書き）</div>
+        <textarea id="inputText" placeholder="ここに横書きのテキストを入力してください...&#10;&#10;リアルタイムで右側に縦書きプレビューが表示されます。" oninput="updatePreview()"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📜 プレビュー（縦書き）</div>
+        <div class="preview-container" id="previewContainer">
+          <div class="preview-content font-mincho" id="previewContent">
+            <span class="placeholder-text">← 左側にテキストを入力</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="export-group">
+        <span class="export-group-label">📝 テキスト</span>
+        <button class="tool-btn" onclick="copyVerticalText()">📋 縦書きコピー</button>
+      </div>
+      <div class="export-group">
+        <span class="export-group-label">🖼️ 画像</span>
+        <button class="tool-btn" onclick="copyImage()">📋 コピー</button>
+        <button class="tool-btn" onclick="saveImage()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="exportCanvas"></canvas>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const inputText = document.getElementById('inputText');
+    const previewContent = document.getElementById('previewContent');
+    const previewContainer = document.getElementById('previewContainer');
+    const textColorPicker = document.getElementById('textColor');
+    const bgColorPicker = document.getElementById('bgColor');
+    const exportCanvas = document.getElementById('exportCanvas');
+    const ctx = exportCanvas.getContext('2d');
+    const toast = document.getElementById('toast');
+
+    let currentFont = 'mincho';
+    let currentSize = 'M';
+    let currentSpacing = 'normal';
+
+    const sizeMap = { S: '1rem', M: '1.2rem', L: '1.6rem', XL: '2rem' };
+    const sizeMapPx = { S: 24, M: 32, L: 44, XL: 56 };
+    const spacingMap = { narrow: 1.6, normal: 2, wide: 2.5 };
+    const fontFamilyMap = {
+      mincho: '"Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif',
+      gothic: '"Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif',
+      maru: '"Kosugi Maru", "Rounded Mplus 1c", sans-serif'
+    };
+
+    const MIN_IMAGE_SIZE = 500;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Theme
+    const savedTheme = localStorage.getItem('tate-theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      bgColorPicker.value = '#2a2a2a';
+      textColorPicker.value = '#e0e0e0';
+    }
+    updateThemeButton();
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('tate-theme', isDark ? 'light' : 'dark');
+      if (isDark) {
+        bgColorPicker.value = '#fffef8';
+        textColorPicker.value = '#333333';
+      } else {
+        bgColorPicker.value = '#2a2a2a';
+        textColorPicker.value = '#e0e0e0';
+      }
+      updateThemeButton();
+      updatePreview();
+    }
+
+    function updateThemeButton() {
+      document.querySelector('.theme-toggle').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+    }
+
+    function setFont(font) {
+      currentFont = font;
+      document.querySelectorAll('[data-font]').forEach(btn => btn.classList.toggle('active', btn.dataset.font === font));
+      previewContent.className = 'preview-content font-' + font;
+      updatePreview();
+    }
+
+    function setSize(size) {
+      currentSize = size;
+      document.querySelectorAll('[data-size]').forEach(btn => btn.classList.toggle('active', btn.dataset.size === size));
+      updatePreview();
+    }
+
+    function setSpacing(spacing) {
+      currentSpacing = spacing;
+      document.querySelectorAll('[data-spacing]').forEach(btn => btn.classList.toggle('active', btn.dataset.spacing === spacing));
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const text = inputText.value;
+      previewContent.style.fontSize = sizeMap[currentSize];
+      previewContent.style.lineHeight = spacingMap[currentSpacing];
+      previewContent.style.color = textColorPicker.value;
+      previewContainer.style.background = bgColorPicker.value;
+
+      if (text.trim() === '') {
+        previewContent.innerHTML = '<span class="placeholder-text">← 左側にテキストを入力</span>';
+      } else {
+        previewContent.textContent = text;
+      }
+    }
+
+    // 縦書きテキストをコピー（複数列対応・右から左へ）
+    function copyVerticalText() {
+      const text = inputText.value;
+      if (!text.trim()) {
+        showToast('テキストを入力してください');
+        return;
+      }
+      
+      const lines = text.split('\n');
+      const maxLength = Math.max(...lines.map(l => [...l].length));
+      
+      // 各行を配列化してパディング（全角スペースで埋める）
+      const columns = lines.map(line => {
+        const chars = [...line];
+        while (chars.length < maxLength) {
+          chars.push('　');
+        }
+        return chars;
+      });
+      
+      // グリッド構築（右から左 = 最後の行から最初の行へ）
+      let result = [];
+      for (let row = 0; row < maxLength; row++) {
+        let rowChars = [];
+        // 右から左に並べる（最後の列を左端に、最初の列を右端に）
+        for (let col = columns.length - 1; col >= 0; col--) {
+          rowChars.push(columns[col][row]);
+        }
+        result.push(rowChars.join('　'));
+      }
+      
+      const verticalText = result.join('\n');
+      
+      navigator.clipboard.writeText(verticalText).then(() => {
+        showToast('縦書きテキストをコピーしました！');
+      });
+    }
+
+    function generateCanvas() {
+      const text = inputText.value;
+      if (!text.trim()) return false;
+
+      const fontSize = sizeMapPx[currentSize];
+      const lineHeight = spacingMap[currentSpacing];
+      const padding = 60;
+      const lines = text.split('\n');
+      const maxLineLength = Math.max(...lines.map(l => [...l].length));
+
+      const charHeight = fontSize * 1.15;
+      const lineWidth = fontSize * lineHeight;
+      let contentHeight = maxLineLength * charHeight + padding * 2;
+      let contentWidth = lines.length * lineWidth + padding * 2;
+
+      // 最小500pxを保証
+      let scale = 1;
+      if (contentWidth < MIN_IMAGE_SIZE && contentHeight < MIN_IMAGE_SIZE) {
+        scale = MIN_IMAGE_SIZE / Math.max(contentWidth, contentHeight);
+      } else if (contentWidth < MIN_IMAGE_SIZE) {
+        scale = MIN_IMAGE_SIZE / contentWidth;
+      } else if (contentHeight < MIN_IMAGE_SIZE) {
+        scale = MIN_IMAGE_SIZE / contentHeight;
+      }
+
+      const finalWidth = Math.ceil(contentWidth * scale);
+      const finalHeight = Math.ceil(contentHeight * scale);
+      const scaledFontSize = fontSize * scale;
+      const scaledCharHeight = charHeight * scale;
+      const scaledLineWidth = lineWidth * scale;
+      const scaledPadding = padding * scale;
+
+      exportCanvas.width = finalWidth;
+      exportCanvas.height = finalHeight;
+
+      ctx.fillStyle = bgColorPicker.value;
+      ctx.fillRect(0, 0, finalWidth, finalHeight);
+
+      ctx.fillStyle = textColorPicker.value;
+      ctx.font = `${scaledFontSize}px ${fontFamilyMap[currentFont]}`;
+      ctx.textBaseline = 'top';
+
+      // 右から左へ描画（最初の行が右端）
+      for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+        const lineChars = [...lines[lineIdx]];
+        const x = finalWidth - scaledPadding - (lineIdx + 1) * scaledLineWidth + (scaledLineWidth - scaledFontSize) / 2;
+        for (let charIdx = 0; charIdx < lineChars.length; charIdx++) {
+          const char = lineChars[charIdx];
+          const y = scaledPadding + charIdx * scaledCharHeight;
+          
+          if ('ー－—〜～'.includes(char)) {
+            ctx.save();
+            ctx.translate(x + scaledFontSize / 2, y + scaledCharHeight / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.fillText(char, -scaledFontSize / 2, -scaledCharHeight / 2);
+            ctx.restore();
+          } else {
+            ctx.fillText(char, x, y);
+          }
+        }
+      }
+      return true;
+    }
+
+    function copyImage() {
+      if (!generateCanvas()) {
+        showToast('テキストを入力してください');
+        return;
+      }
+      exportCanvas.toBlob(blob => {
+        const item = new ClipboardItem({ 'image/png': blob });
+        navigator.clipboard.write([item]).then(() => {
+          showToast('画像をコピーしました！');
+        }).catch(err => {
+          showToast('コピーに失敗しました');
+          console.error(err);
+        });
+      }, 'image/png');
+    }
+
+    function saveImage() {
+      if (!generateCanvas()) {
+        showToast('テキストを入力してください');
+        return;
+      }
+      const link = document.createElement('a');
+      link.download = '縦書き_' + new Date().toISOString().slice(0, 10) + '.png';
+      link.href = exportCanvas.toDataURL('image/png');
+      link.click();
+      showToast('画像を保存しました！');
+    }
+
+    updatePreview();
+  </script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
