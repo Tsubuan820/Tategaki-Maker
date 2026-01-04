@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>Tategaki-Maker</title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -61,14 +50,11 @@
     canvas { display: none; }
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: white; padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
     .toast.show { opacity: 1; }
-  /* ↓ ここに追加 ↓ */
-  .footer { margin-top: 24px; padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); }
-  .footer .heart { color: #e53935; }
-  .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
-  .footer a:hover { color: var(--accent-color); }
-  .footer .sep { margin: 0 8px; opacity: 0.5; }
-</style>
-    
+    .footer { margin-top: 24px; padding: 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); }
+    .footer .heart { color: #e53935; }
+    .footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+    .footer a:hover { color: var(--accent-color); }
+    .footer .sep { margin: 0 8px; opacity: 0.5; }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Noto+Sans+JP&family=Noto+Serif+JP&display=swap" rel="stylesheet">
 </head>
@@ -129,17 +115,16 @@
         <span class="export-group-label">📝 テキスト</span>
         <button class="tool-btn" onclick="copyVerticalText()">📋 縦書きコピー</button>
       </div>
-
-      <footer class="footer">
-       Made with <span class="heart">♥</span> by Tsubuan © 2026<span class="sep">｜</span><a href="[https://x.com/tsubuan_sun](https://x.com/tsubuan_sun)" target="_blank">𝕏 でフォロー</a><span class="sep">｜</span><a href="[https://note.com/tsubuan_sun/n/nae115b6b663e](https://note.com/tsubuan_sun/n/nae115b6b663e)" target="_blank">🎁 投げ銭する</a><span class="sep">｜</span><a href="[http://buymeacoffee.com/tsubuan](http://buymeacoffee.com/tsubuan)" target="_blank">☕ Buy Me a Coffee</a>
-      </footer>
-      
       <div class="export-group">
         <span class="export-group-label">🖼️ 画像</span>
         <button class="tool-btn" onclick="copyImage()">📋 コピー</button>
         <button class="tool-btn" onclick="saveImage()">💾 保存</button>
       </div>
     </div>
+
+    <footer class="footer">
+      Made with <span class="heart">♥</span> by Tsubuan © 2026<span class="sep">｜</span><a href="https://x.com/tsubuan_sun" target="_blank">𝕏 でフォロー</a><span class="sep">｜</span><a href="https://note.com/tsubuan_sun/n/nae115b6b663e" target="_blank">🎁 投げ銭する</a><span class="sep">｜</span><a href="https://buymeacoffee.com/tsubuan" target="_blank">☕ Buy Me a Coffee</a>
+    </footer>
   </div>
 
   <canvas id="exportCanvas"></canvas>
@@ -176,7 +161,6 @@
       setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    // Theme
     const savedTheme = localStorage.getItem('tate-theme') || 'light';
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
@@ -237,7 +221,6 @@
       }
     }
 
-    // 縦書きテキストをコピー（複数列対応・右から左へ）
     function copyVerticalText() {
       const text = inputText.value;
       if (!text.trim()) {
@@ -248,7 +231,6 @@
       const lines = text.split('\n');
       const maxLength = Math.max(...lines.map(l => [...l].length));
       
-      // 各行を配列化してパディング（全角スペースで埋める）
       const columns = lines.map(line => {
         const chars = [...line];
         while (chars.length < maxLength) {
@@ -257,11 +239,9 @@
         return chars;
       });
       
-      // グリッド構築（右から左 = 最後の行から最初の行へ）
       let result = [];
       for (let row = 0; row < maxLength; row++) {
         let rowChars = [];
-        // 右から左に並べる（最後の列を左端に、最初の列を右端に）
         for (let col = columns.length - 1; col >= 0; col--) {
           rowChars.push(columns[col][row]);
         }
@@ -290,7 +270,6 @@
       let contentHeight = maxLineLength * charHeight + padding * 2;
       let contentWidth = lines.length * lineWidth + padding * 2;
 
-      // 最小500pxを保証
       let scale = 1;
       if (contentWidth < MIN_IMAGE_SIZE && contentHeight < MIN_IMAGE_SIZE) {
         scale = MIN_IMAGE_SIZE / Math.max(contentWidth, contentHeight);
@@ -317,7 +296,6 @@
       ctx.font = `${scaledFontSize}px ${fontFamilyMap[currentFont]}`;
       ctx.textBaseline = 'top';
 
-      // 右から左へ描画（最初の行が右端）
       for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
         const lineChars = [...lines[lineIdx]];
         const x = finalWidth - scaledPadding - (lineIdx + 1) * scaledLineWidth + (scaledLineWidth - scaledFontSize) / 2;
@@ -370,8 +348,4 @@
     updatePreview();
   </script>
 </body>
-</html>
-    
-  </body>
-  
 </html>
